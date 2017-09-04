@@ -2,6 +2,34 @@
 
 let config;
 
+function getMenuItemUrlForText(menuItemId, text) {
+  switch (menuItemId) {
+    case MENU_ITEMS.BUG:
+      return maybeGetCrBug(text) || getCrBugSearch(text);
+    case MENU_ITEMS.CODE_SEARCH:
+      return getCodeSearch(config.lookupTypes.CODESEARCH, text);
+    case MENU_ITEMS.CODE_SEARCH_CHROMIUM:
+      return getCodeSearch(CODE_SEARCH.CHROMIUM, text);
+    case MENU_ITEMS.CODE_SEARCH_CHROMIUM_OS:
+      return getCodeSearch(CODE_SEARCH.CHROMIUM_OS, text);
+    case MENU_ITEMS.REVISION:
+      return maybeGetCrRev(text) || maybeGetOwnerCodeReviews(text) ||
+          getRev(text);
+    case MENU_ITEMS.AUTO:
+      let url;
+      if (config.lookupTypes.CRBUG)
+        url = maybeGetCrBug(text);
+      if (!url && config.lookupTypes.CRREV)
+        url = maybeGetCrRev(text);
+      // Fall back to code search.
+      if (!url)
+        url = getCodeSearch(config.lookupTypes.CODESEARCH, text);
+      return url;
+    default:
+      throw 'Invalid menu item ID: ' + menuItemId;
+  }
+}
+
 function onItemClick(info, tab) {
   // This can be called before the extension is actually activated; apparently
   // Chrome "caches" extension-created context menu items, so this function can
@@ -15,33 +43,7 @@ function onItemClick(info, tab) {
   let text = info.selectionText.trim();
   let url;
 
-  switch (info.menuItemId) {
-    case 'auto':
-      if (config.lookupTypes.CRBUG)
-        url = maybeGetCrBug(text);
-      if (!url && config.lookupTypes.CRREV)
-        url = maybeGetCrRev(text);
-      if (!url)
-        url = getCodeSearch(config.lookupTypes.CODESEARCH, text);
-      break;
-    case 'crbug':
-      url = maybeGetCrBug(text) || getCrBugSearch(text);
-      break;
-    case 'crrev':
-      url = maybeGetCrRev(text) || maybeGetOwnerCodeReviews(text) ||
-          getRev(text);
-      break;
-    case 'codeSearchChromium':
-      url = getCodeSearch(codeSearchChromium, text);
-      break;
-    case 'codeSearchChromiumOS':
-      url = getCodeSearch(codeSearchChromiumOS, text);
-      break;
-    case 'codeSearchCustom':
-      url = getCodeSearch(config.lookupTypes.CODESEARCH, text);
-      break;
-  }
-
+  url = getMenuItemUrlForText(info.menuItemId, text);
   if (url)
     chrome.tabs.create({url: url});
 }
@@ -124,10 +126,8 @@ function getRev(text) {
 }
 
 function getCodeSearch(searchUrl, text) {
-  //let params = new URLSearchParams;
-
   let query = text.replace(/"/g, '\\"');
-  if (searchUrl == codeSearchChromium)
+  if (searchUrl == CODE_SEARCH.CHROMIUM)
     query = '"' + query + '"';
 
   return searchUrl.replace('%s', encodeURIComponent(query));
@@ -137,13 +137,13 @@ chrome.contextMenus.onClicked.addListener(onItemClick);
 
 
 function addContextMenus() {
-  chrome.contextMenus.removeAll(doAddContextMenus);
+  chrome.contextMenus.removeAll(onContextMenusRemoved);
 }
 
-function doAddContextMenus() {
+function onContextMenusRemoved() {
   if (!config.manualMode) {
     chrome.contextMenus.create({
-      id: 'auto',
+      id: MENU_ITEMS.AUTO,
       title: 'Chromium Lookup: "%s"',
       contexts: ['selection'],
     });
@@ -152,17 +152,19 @@ function doAddContextMenus() {
 
   let codeSearchId;
   let title;
+  // TODO: Make the presets actual settings, instead of tying them to a
+  // specific URL.
   switch (config.lookupTypes.CODESEARCH) {
-    case codeSearchChromium:
-      codeSearchId = 'codeSearchChromium';
+    case CODE_SEARCH.CHROMIUM:
+      codeSearchId = MENU_ITEMS.CODE_SEARCH_CHROMIUM;
       title = 'Code search';
       break;
-    case codeSearchChromiumOS:
-      codeSearchId = 'codeSearchChromiumOS';
+    case CODE_SEARCH.CHROMIUM_OS:
+      codeSearchId = MENU_ITEMS.CODE_SEARCH_CHROMIUM_OS;
       title = 'Chromium OS code search';
       break;
     default:
-      codeSearchId = 'codeSearchCustom';
+      codeSearchId = MENU_ITEMS.CODE_SEARCH;
       title = 'Custom search';
       break;
   }
@@ -174,7 +176,7 @@ function doAddContextMenus() {
 
   if (config.lookupTypes.CRBUG) {
     chrome.contextMenus.create({
-      id: 'crbug',
+      id: MENU_ITEMS.BUG,
       title: 'Bug search',
       contexts: ['selection'],
     });
@@ -182,7 +184,7 @@ function doAddContextMenus() {
 
   if (config.lookupTypes.CRREV) {
     chrome.contextMenus.create({
-      id: 'crrev',
+      id: MENU_ITEMS.REVISION,
       title: 'Revision/CL',
       contexts: ['selection'],
     });

@@ -26,9 +26,9 @@ function loadOptions() {
     $('sourceCrBug').checked = config.lookupTypes.CRBUG;
     $('sourceCrRev').checked = config.lookupTypes.CRREV;
 
-    if (config.lookupTypes.CODESEARCH == codeSearchChromium) {
+    if (config.lookupTypes.CODESEARCH == CODE_SEARCH.CHROMIUM) {
       $('codeSearchSite').value = 'chromium';
-    } else if (config.lookupTypes.CODESEARCH == codeSearchChromiumOS) {
+    } else if (config.lookupTypes.CODESEARCH == CODE_SEARCH.CHROMIUM_OS) {
       $('codeSearchSite').value = 'chromium-os';
     } else {
       $('codeSearchSite').value = 'custom';
@@ -72,9 +72,9 @@ function onOptionsChanged() {
   };
 
   if (codeSearchSite == 'chromium') {
-    config.lookupTypes.CODESEARCH = codeSearchChromium;
+    config.lookupTypes.CODESEARCH = CODE_SEARCH.CHROMIUM;
   } else if (codeSearchSite == 'chromium-os') {
-    config.lookupTypes.CODESEARCH = codeSearchChromiumOS;
+    config.lookupTypes.CODESEARCH = CODE_SEARCH.CHROMIUM_OS;
   } else {
     let customUrlValue = $('codeSearchCustomUrl').value;
     if (!isValidSearchUrl(customUrlValue))
