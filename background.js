@@ -3,6 +3,15 @@
 let config;
 
 function onItemClick(info, tab) {
+  // This can be called before the extension is actually activated; apparently
+  // Chrome "caches" extension-created context menu items, so this function can
+  // be called almost immediately after loading.
+  if (!config) {
+    // Wait for storage to load.
+    setTimeout(onItemClick.bind(null, info, tab));
+    return;
+  }
+
   let text = info.selectionText.trim();
   let url;
 
@@ -128,6 +137,10 @@ chrome.contextMenus.onClicked.addListener(onItemClick);
 
 
 function addContextMenus() {
+  chrome.contextMenus.removeAll(doAddContextMenus);
+}
+
+function doAddContextMenus() {
   if (!config.manualMode) {
     chrome.contextMenus.create({
       id: 'auto',
@@ -177,13 +190,12 @@ function addContextMenus() {
 }
 
 function reset() {
-  chrome.contextMenus.removeAll(function() {
-    chrome.storage.sync.get(defaultConfig, function(loadedConfig) {
-      config = loadedConfig;
-      addContextMenus();
-    });
+  chrome.storage.sync.get(defaultConfig, function(loadedConfig) {
+    config = loadedConfig;
+    addContextMenus();
   });
 }
 
-chrome.runtime.onInstalled.addListener(reset);
 chrome.storage.onChanged.addListener(reset);
+
+reset();
