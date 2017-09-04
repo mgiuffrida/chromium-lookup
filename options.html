@@ -1,0 +1,57 @@
+<!doctype html>
+<head>
+  <title>Chromium Lookup Options</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <fieldset>
+    <legend>Lookup sources</legend>
+    <div>
+      <input type="checkbox" id="sourceCrBug" checked
+          aria-labelledby="sourceLabelCrBug">
+      <label id="sourceLabelCrBug" for="sourceCrBug">crbug.com (bugs)</label>
+      <div class="secondary">Examples: 123456, issue 123456, cr:123456</div>
+    </div>
+    <div>
+      <input type="checkbox" id="sourceCrRev" checked
+          aria-labelledby="sourceLabelCrRev">
+      <label id="sourceLabelCrRev" for="sourceCrRev">
+        crrev.com (commits &amp; code reviews)
+      </label>
+      <div class="secondary">Examples: 4041a2c, crrev/2699553002</div>
+    </div>
+    <div class="custom-select">
+      <div>
+        <label id="codeSearchLabel" for="codeSearchSite">Code search:</label>
+        <select id="codeSearchSite" aria-labelledby="codeSearchLabel">
+          <option value="chromium">Chromium code search</option>
+          <option value="chromium-os">Chromium OS (mirror)</option>
+          <option value="custom">Custom</option>
+        </select>
+      </div>
+      <div id="codeSearchCustom" hidden class="secondary">
+        <label id="codeSearchCustomLabel" for="codeSearchCustomUrl">URL:</label>
+        <input type="text" id="codeSearchCustomUrl"
+            placeholder="https://example.com/?q=%s"
+            aria-labelledby="codeSearchCustomLabel">
+      </div>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Behavior</legend>
+    <div>
+      <input type="checkbox" id="manualMode" aria-labelledby="manualModeLabel">
+      <label id="manualModeLabel" for="manualMode">Manual mode</label>
+      <div class="secondary">
+        Choose lookup type from context menu every time
+      </div>
+    </div>
+  </fieldset>
+
+  <div id="status">Saved!</span>
+
+  <script src="common.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>

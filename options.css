@@ -1,0 +1,63 @@
+[hidden] {
+  display: none !important;
+}
+
+body {
+  font-size: 100%;
+  min-width: 450px;
+}
+
+fieldset {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+}
+
+legend, label {
+  font-weight: bold;
+}
+
+fieldset > div {
+  margin-bottom: 4px;
+}
+
+#codeSearchCustom {
+  width: 380px;
+  display: flex;
+  flex-direction: row;
+}
+
+#codeSearchCustom input[type=text] {
+  flex: 1;
+  -webkit-margin-start: 10px;
+}
+
+.secondary {
+  font-size: 90%;
+  -webkit-padding-start: 32px;
+}
+
+.secondary, .secondary label {
+  font-weight: normal;
+}
+
+label + select {
+  -webkit-margin-start: 10px;
+}
+
+select {
+  margin-bottom: 8px;
+}
+
+#status {
+  margin-top: 10px;
+  font-size: initial;
+  color: green;
+  opacity: 0;
+  transition: opacity 1s ease-in;
+}
+
+#status.showing {
+  opacity: 1;
+  transition: none;
+}
