@@ -50,14 +50,15 @@ function onItemClick(info, tab) {
 
 function maybeGetCrBug(text) {
   let matches =
-      text.match(
+      text.match(new RegExp(
           '^' +
           '(?:' +
             'issue ?|issue ?#|#|cr:|cr/|crbug:|crbug/|crbug.com/' +
           ')?' +
           '(\\d{3,6})' +
           '(#\\d*)?' +
-          '$');
+          '$',
+          'i'));
   if (!matches)
     return false;
   let url = 'https://crbug.com/' + matches[1];
@@ -74,33 +75,45 @@ function getCrBugSearch(text) {
 function maybeGetCrRev(text) {
   // Find obvious matches.
   let matches =
-      text.match(
+      text.match(new RegExp(
           '^' +
           '(?:' +
             'crrev\.com/|crrev\.com:|crrev/|crrev:' +
           ')' +
-          '(\\d*)' +
+          '((?:[ci]/)?\\d*)' +
           '((?:/|#).*)?' +
-          '$');
+          '$',
+          'i'));
+  if (!matches) {
+    matches =
+        text.match(new RegExp(
+            '^' +
+            '([ci]/\\d*)' +
+            '((?:/|#).*)?' +
+            '$',
+            'i'));
+  }
   // Heuristic matches.
   if (!matches) {
     matches =
-        text.match(
+        text.match(new RegExp(
             '^' +
             '(?:' +
               'issue ?|issue ?#|#' +
             ')?' +
-            '(\\d{4,6})' +
+            '(\\d{4,10})' +
             '((?:/|#).*)?' +
-            '$');
+            '$',
+            'i'));
   }
   // Revisions.
   if (!matches) {
-    matches = 
-        text.match(
+    matches =
+        text.match(new RegExp(
             '^' +
-            '([0-9a-fA-F]{6,40})' +
-            '$');
+            '([0-9a-f]{6,40})' +
+            '$',
+            'i'));
   }
   if (!matches)
     return false;
@@ -117,8 +130,8 @@ function maybeGetOwnerCodeReviews(text) {
     return false;
 
   // Do an owner search, for lack of a better option.
-  return 'https://codereview.chromium.org/search?owner=' +
-      encodeURIComponent(text);
+  return 'https://chromium-review.googlesource.com/q/' +
+      encodeURIComponent('owner:' + text);
 }
 
 function getRev(text) {
